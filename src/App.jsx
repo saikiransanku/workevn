@@ -492,37 +492,6 @@ function App() {
 
   return (
     <div className="app-shell">
-      <header className="portal-switcher">
-        <div>
-          <p className="eyebrow">Domain-based home service platform</p>
-          <h1>Workven</h1>
-        </div>
-
-        <div className="portal-switcher__actions" aria-label="Portal switcher">
-          <button
-            type="button"
-            className={portal === 'customer' ? 'chip-button chip-button--active' : 'chip-button'}
-            onClick={() => navigate('/customer')}
-          >
-            Customer
-          </button>
-          <button
-            type="button"
-            className={portal === 'worker' ? 'chip-button chip-button--active' : 'chip-button'}
-            onClick={() => navigate('/worker')}
-          >
-            Worker
-          </button>
-          <button
-            type="button"
-            className={portal === 'admin' ? 'chip-button chip-button--active' : 'chip-button'}
-            onClick={() => navigate('/admin')}
-          >
-            Admin
-          </button>
-        </div>
-      </header>
-
       {portal === 'admin' ? (
         <AdminDashboard
           orders={orders}
@@ -636,6 +605,7 @@ function CustomerPortal({
       setOrders={setOrders}
       navigate={navigate}
       setWorkerLeads={setWorkerLeads}
+      setCustomerSession={setCustomerSession}
     />
   )
 }
@@ -811,6 +781,7 @@ function CustomerDashboard({
   setOrders,
   navigate,
   setWorkerLeads,
+  setCustomerSession,
 }) {
   const [searchQuery, setSearchQuery] = useState('Electrical repair')
   const [selectedService, setSelectedService] = useState('Electrical')
@@ -846,6 +817,16 @@ function CustomerDashboard({
   })
   const [contactMode, setContactMode] = useState('self')
   const [bookingMessage, setBookingMessage] = useState('')
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false)
+  const [showAddress, setShowAddress] = useState(true)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowAddress(window.scrollY < 50)
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   const repairs = repairCatalog[selectedService] ?? []
   const selectedSlot = arrivalSlots.find((slot) => slot.id === timeSlotId) ?? arrivalSlots[0]
@@ -1032,17 +1013,17 @@ function CustomerDashboard({
     const nextRecipientContact =
       contactMode === 'self'
         ? {
-            mode: 'self',
-            name: customerProfile.name,
-            mobile: customerProfile.mobile,
-            relation: 'Self',
-          }
+          mode: 'self',
+          name: customerProfile.name,
+          mobile: customerProfile.mobile,
+          relation: 'Self',
+        }
         : {
-            mode: 'guest',
-            name: contactDraft.name,
-            mobile: contactDraft.mobile,
-            relation: contactDraft.relation,
-          }
+          mode: 'guest',
+          name: contactDraft.name,
+          mobile: contactDraft.mobile,
+          relation: contactDraft.relation,
+        }
 
     applyLocation(pendingFarLocation, nextRecipientContact)
   }
@@ -1205,32 +1186,64 @@ function CustomerDashboard({
   return (
     <main className="portal-page">
       <section className="customer-home">
-        <div className="mobile-home-header panel">
-          <div>
+        
+        {/* Address at the top of the header that hides on scroll */}
+        {showAddress && (
+          <div className="address-bar-top" style={{ padding: '12px 14px', background: '#fff' }}>
             <button
               type="button"
               className="location-button"
               onClick={() => setLocationPanelOpen(true)}
+              style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}
             >
               <span className="eyebrow">Location</span>
               <strong>{selectedLocation.label}</strong>
               <small>{selectedLocation.address}</small>
             </button>
           </div>
+        )}
 
-          <div className="top-action-strip">
-            <button type="button" className="emergency-button" onClick={() => setEmergency(true)}>
-              Emergency service
-            </button>
-            <button
-              type="button"
-              className="profile-button"
-              onClick={() => navigate('/customer/profile')}
-              aria-label="Open profile"
-            >
-              <Avatar profile={customerProfile} size="md" />
-            </button>
+        <div className="mobile-home-header panel" style={{ flexDirection: 'column', alignItems: 'stretch', position: 'sticky', top: 0, zIndex: 50, borderRadius: showAddress ? '0 0 16px 16px' : '0 0 16px 16px', borderTop: showAddress ? '1px solid var(--border)' : 'none', margin: 0 }}>
+          <div className="header-top-row">
+            <div className="header-left">
+              <div className="logo-placeholder">
+                <h2 style={{ margin: 0 }}>Workven</h2>
+              </div>
+            </div>
+
+            <div className="header-search">
+              <input
+                type="text"
+                className="search-input"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Search for services..."
+              />
+            </div>
+
+            <div className="header-right" style={{ position: 'relative' }}>
+              <button
+                type="button"
+                className="profile-button"
+                onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+                aria-label="Open profile"
+              >
+                <Avatar profile={customerProfile} size="md" />
+              </button>
+              
+              {profileMenuOpen && (
+                <div className="profile-dropdown">
+                  <button onClick={() => navigate('/customer/profile')}>Profile Settings</button>
+                  <button onClick={() => navigate('/customer/profile#orders')}>Orders</button>
+                  <button onClick={() => navigate('/customer/profile#themes')}>Themes</button>
+                  <hr />
+                  <button className="danger-text" onClick={() => setCustomerSession(false)}>Logout</button>
+                </div>
+              )}
+            </div>
           </div>
+
+
         </div>
 
         <section className="hero-band hero-band--compact">
@@ -1302,15 +1315,7 @@ function CustomerDashboard({
                 </div>
               </div>
 
-              <label className="field">
-                <span>Search service</span>
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(event) => setSearchQuery(event.target.value)}
-                  placeholder="Electrical, plumbing, AC and more"
-                />
-              </label>
+              {/* Search input moved to header */}
 
               {searchQuery ? (
                 <div className="suggestion-list">
@@ -2549,7 +2554,46 @@ function CustomerProfilePage({
             </div>
           </article>
 
-          <article className="panel app-section">
+          <article className="panel app-section" id="themes">
+            <div className="section-heading">
+              <div>
+                <p className="eyebrow">Themes</p>
+                <h3>App appearance</h3>
+              </div>
+            </div>
+
+            <label className="field">
+              <span>Select Theme</span>
+              <select defaultValue="light">
+                <option value="light">Light Mode</option>
+                <option value="dark">Dark Mode</option>
+                <option value="system">System Default</option>
+              </select>
+            </label>
+          </article>
+
+          <article className="panel app-section" id="support">
+            <div className="section-heading">
+              <div>
+                <p className="eyebrow">AI Support</p>
+                <h3>Ask common questions</h3>
+              </div>
+            </div>
+            
+            <div style={{ background: 'var(--soft)', padding: '16px', borderRadius: '8px' }}>
+               <div style={{ marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                 <div style={{ background: '#fff', padding: '10px 14px', borderRadius: '8px', alignSelf: 'flex-start', maxWidth: '85%', border: '1px solid var(--border)' }}>
+                   <strong>AI Assistant:</strong> Hi there! Need help with your orders or services? I can answer any common questions.
+                 </div>
+               </div>
+               <div style={{ display: 'flex', gap: '8px' }}>
+                 <input type="text" placeholder="Type your question..." className="search-input" style={{ flex: 1, margin: 0 }} />
+                 <button type="button" className="primary-button" onClick={() => alert('AI generation feature would respond here.')}>Send</button>
+               </div>
+            </div>
+          </article>
+
+          <article className="panel app-section" id="settings">
             <div className="section-heading">
               <div>
                 <p className="eyebrow">Settings</p>
@@ -2568,9 +2612,41 @@ function CustomerProfilePage({
               </select>
             </label>
 
-            <button type="button" className="secondary-button" onClick={() => setCustomerSession(false)}>
-              Sign out
-            </button>
+            <div className="field-row" style={{ marginTop: '24px' }}>
+              <button type="button" className="secondary-button" onClick={() => setCustomerSession(false)}>
+                Sign out
+              </button>
+              <button type="button" className="secondary-button" onClick={() => {
+                  alert('Account deleted successfully');
+                  setCustomerSession(false);
+              }} style={{ borderColor: '#d32f2f', color: '#d32f2f' }}>
+                Delete account
+              </button>
+            </div>
+
+            <div className="section-heading" style={{ marginTop: '32px' }}>
+              <div>
+                <p className="eyebrow">Portals</p>
+                <h3>Switch application portal</h3>
+              </div>
+            </div>
+
+            <div className="field-row">
+              <button
+                type="button"
+                className="chip-button"
+                onClick={() => navigate('/worker')}
+              >
+                Worker Portal
+              </button>
+              <button
+                type="button"
+                className="chip-button"
+                onClick={() => navigate('/admin')}
+              >
+                Admin Portal
+              </button>
+            </div>
           </article>
         </section>
       </section>
