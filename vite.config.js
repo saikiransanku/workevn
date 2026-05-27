@@ -18,6 +18,13 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react(), tailwindcss()],
+    resolve: {
+      alias: {
+        '../../shared': resolve(rootDir, 'shared'),
+        '../../../shared': resolve(rootDir, 'shared'),
+        '../../../../shared': resolve(rootDir, 'shared'),
+      },
+    },
     build: {
       rollupOptions: {
         input: resolve(rootDir, entry),
