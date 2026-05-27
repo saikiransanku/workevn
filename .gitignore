@@ -7,10 +7,41 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
+
+# Build outputs
 dist
+dist-admin
+dist-partner
 dist-ssr
+.vite
+coverage
+
+# Local caches
+.cache
+.parcel-cache
+*.tsbuildinfo
+
+# Local backend data
+apps/admin/backend/db/*.json
+!apps/admin/backend/db/*.example.json
+backend/db/*.json
+!backend/db/*.example.json
+*.sqlite
+*.sqlite3
+*.db
+
+# Environment files
 *.local
+.env
+.env.*
+!.env.example
+
+# Temporary files
+tmp
+temp
+*.tmp
 
 # Editor directories and files
 .vscode/*
