@@ -59,6 +59,19 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true
     }
+    ,
+    // current session identifier to enforce single active session
+    currentSessionId: {
+      type: String,
+      default: null,
+      select: false
+    },
+    // password reset token and expiry
+    resetPasswordToken: {
+      type: String,
+      select: false
+    },
+    resetPasswordExpires: Date
   },
   { timestamps: true }
 );

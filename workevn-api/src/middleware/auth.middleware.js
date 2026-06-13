@@ -12,10 +12,15 @@ export const requireAuth = asyncHandler(async (req, _res, next) => {
   }
 
   const payload = jwt.verify(token, process.env.JWT_SECRET);
-  const user = await User.findById(payload.id).select("+passwordHash");
+  const user = await User.findById(payload.id).select("+passwordHash +currentSessionId");
 
   if (!user || !user.isActive) {
     throw new ApiError(401, "Invalid authentication token");
+  }
+
+  // If a sessionId is present in token, ensure it matches the user's currentSessionId
+  if (payload.sessionId && user.currentSessionId && payload.sessionId !== user.currentSessionId) {
+    throw new ApiError(401, "Session expired: please sign in again");
   }
 
   req.user = user;
