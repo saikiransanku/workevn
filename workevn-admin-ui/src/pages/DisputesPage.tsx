@@ -112,12 +112,12 @@ export default function DisputesPage() {
                       <p className="text-xs text-slate-500">Partner: {dispute.partnerName}</p>
                     </td>
                     <td className="px-6 py-4">
-                      <Badge tone={dispute.priority === "high" ? "danger" : dispute.priority === "medium" ? "warning" : "muted"}>
+                      <Badge tone={dispute.priority === "high" ? "danger" : dispute.priority === "medium" ? "warning" : "neutral"}>
                         {dispute.priority}
                       </Badge>
                     </td>
                     <td className="px-6 py-4">
-                      <Badge tone={dispute.status === "resolved" ? "success" : dispute.status === "open" ? "warning" : "muted"}>
+                      <Badge tone={dispute.status === "resolved" ? "success" : dispute.status === "open" ? "warning" : "neutral"}>
                         {dispute.status}
                       </Badge>
                     </td>

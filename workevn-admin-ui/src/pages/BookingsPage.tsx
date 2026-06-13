@@ -16,11 +16,13 @@ const statusLabels: Record<BookingStatus, { label: string; tone: "success" | "wa
   arrived: { label: "Arrived", tone: "success" },
   in_progress: { label: "In progress", tone: "warning" },
   completed: { label: "Completed", tone: "success" },
+  cancelled: { label: "Cancelled", tone: "danger" },
   cancelled_by_user: { label: "Cancelled by user", tone: "danger" },
   cancelled_by_partner: { label: "Cancelled by partner", tone: "danger" },
   cancelled_by_admin: { label: "Cancelled by admin", tone: "danger" },
   refunded: { label: "Refunded", tone: "neutral" },
   disputed: { label: "Disputed", tone: "danger" },
+  rejected: { label: "Rejected", tone: "danger" },
   rescheduled: { label: "Rescheduled", tone: "warning" }
 };
 

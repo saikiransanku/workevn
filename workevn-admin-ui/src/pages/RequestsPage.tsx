@@ -48,7 +48,7 @@ export default function RequestsPage() {
   const assignRequest = async (request: RequestRecord) => {
     const partnerId = request.suggestedPartners[0] || "partner_1";
     await postAssignment({ bookingId: request.id, partnerId });
-    const updated = { ...request, status: "assigned", suggestedPartners: request.suggestedPartners };
+    const updated: RequestRecord = { ...request, status: "assigned", suggestedPartners: request.suggestedPartners };
     setRequests((current) => current.map((item) => (item.id === request.id ? updated : item)));
     setSelectedRequest(updated);
   };

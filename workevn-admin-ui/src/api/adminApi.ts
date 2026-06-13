@@ -27,13 +27,17 @@ import {
 const API_BASE = import.meta.env.VITE_ADMIN_API_URL ?? "/api/admin";
 const AUTH_STORAGE_KEY = "workevn-admin-token";
 
-function authHeaders() {
+function authHeaders(): Record<string, string> {
   const token = window.localStorage.getItem(AUTH_STORAGE_KEY) || window.sessionStorage.getItem(AUTH_STORAGE_KEY);
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
 async function fetchJson<T>(path: string, options?: RequestInit): Promise<T> {
-  const headers = { "Content-Type": "application/json", ...authHeaders(), ...(options?.headers ?? {}) };
+  const headers = new Headers(options?.headers);
+  if (!headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+  Object.entries(authHeaders()).forEach(([key, value]) => headers.set(key, value));
   const response = await fetch(path, { ...options, headers });
   if (!response.ok) {
     throw new Error(`API request failed: ${response.status}`);

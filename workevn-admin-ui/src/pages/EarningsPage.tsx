@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Download, DollarSign, FileText, PieChart, TrendingUp } from "lucide-react";
+import { Download, DollarSign, FileText, PieChart, TrendingUp, Wallet } from "lucide-react";
 import { getEarnings } from "../api/adminApi";
 import { EarningsPayload } from "../types/admin";
 import Badge from "../components/ui/Badge";
@@ -10,6 +10,10 @@ import EmptyState from "../components/ui/EmptyState";
 
 function buildLineData(payload: EarningsPayload) {
   return payload.records.map((record) => ({ label: record.date, value: record.finalCharge }));
+}
+
+function buildBarData(data: { label: string; amount: number }[]) {
+  return data.map((item) => ({ label: item.label, value: item.amount }));
 }
 
 export default function EarningsPage() {
@@ -103,8 +107,8 @@ export default function EarningsPage() {
           <div className="grid gap-4 lg:grid-cols-[1.4fr_0.8fr]">
             <LineChart title="Daily settlement" data={buildLineData(earnings)} />
             <div className="space-y-4">
-              <BarChart title="Earnings by partner" data={earnings.breakdownByPartner} />
-              <BarChart title="Revenue by category" data={earnings.breakdownByCategory} />
+              <BarChart title="Earnings by partner" data={buildBarData(earnings.breakdownByPartner)} />
+              <BarChart title="Revenue by category" data={buildBarData(earnings.breakdownByCategory)} />
             </div>
           </div>
 
